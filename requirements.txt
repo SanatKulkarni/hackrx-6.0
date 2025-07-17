@@ -1,0 +1,29 @@
+# Core Dependencies
+langchain
+langchain-community
+langchain-text-splitters
+
+# Document Loading
+pypdf
+python-docx
+
+# Embeddings
+langchain-nomic
+
+# Vector Database
+chromadb
+
+# Environment Management
+python-dotenv
+
+# Development and Testing
+pytest
+pytest-asyncio
+
+# Optional: For better async support
+asyncio-throttle
+
+# System Dependencies (Windows specific for encoding)
+# Note: These are typically included with Python on Windows
+# chardet==5.2.0
+# charset-normalizer==3.3.2
