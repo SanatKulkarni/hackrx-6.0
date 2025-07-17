@@ -1,24 +1,20 @@
-from spire.doc import *
-from spire.doc.common import *
-import os
+import docx
 
+def getText(filename):
+    doc = docx.Document(filename)
+    fullText = []
+    for para in doc.paragraphs:
+        fullText.append(para.text)
+    return '\n'.join(fullText)
 
-file_path = os.environ.get('FILE_PATH', "../dataset/word-format/AI-helper-low-wage.docx")
-
-if not file_path.lower().endswith('.docx'):
-    raise Exception("Invalid file type: Only .docx files are supported by wordLoading.py")
-
-try:
-    document = Document()
-    document.LoadFromFile(file_path)
-    document_text = document.GetText()
-    print(document_text)
-
-except Exception as e:
-    print(f"Error: Unable to process document. Invalid format or file not found.")
-    print(f"Details: {str(e)}")
-    raise
-
-finally:
-    if 'document' in locals():
-        document.Close()
+# Example usage:
+if __name__ == "__main__":
+    file_path = "../dataset/word-format/AI-helper-low-wage.docx"
+    try:
+        extracted_text = getText(file_path)
+        print("Extracted text from Word document:")
+        print(extracted_text)
+    except FileNotFoundError:
+        print(f"File not found: {file_path}")
+    except Exception as e:
+        print(f"Error reading file: {e}")
