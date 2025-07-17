@@ -6,7 +6,7 @@ from embeddings import embed_chunks
 from embeddings.store_to_db import store_embeddings_to_db
 
 file_path = os.path.join("dataset", "pdf-format", "1.pdf")
-main_extractor_path = os.path.join("loader_&_extractor", "main_extractor.py")
+main_extractor_path = os.path.join("loader_&_extractor", "main_extractor")
 
 #Extract text from pdf/word/text files 
 print("Step 1: Extracting text from file...")
