@@ -6,6 +6,11 @@ langchain-text-splitters
 # Document Loading
 pypdf
 python-docx
+pymupdf
+pillow
+numpy
+opencv-python
+google-cloud-vision
 
 # Embeddings
 langchain-nomic
@@ -19,6 +24,7 @@ python-dotenv
 # Development and Testing
 pytest
 pytest-asyncio
+unittest
 
 # Optional: For better async support
 asyncio-throttle
@@ -26,4 +32,4 @@ asyncio-throttle
 # System Dependencies (Windows specific for encoding)
 # Note: These are typically included with Python on Windows
 # chardet==5.2.0
-# charset-normalizer==3.3.2
+# charset
