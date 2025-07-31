@@ -212,20 +212,28 @@ class HackathonQASystem:
             # Create prompt for detailed answers matching API expectations
             prompt = f"""You are an expert insurance policy analyst specializing in the National Parivar Mediclaim Plus Policy. Answer the question based ONLY on the provided context from the insurance policy document.
 
-Context from Insurance Policy:
+POLICY CONTEXT:
 {context}
 
-Question: {question}
+QUESTION: {question}
 
-Instructions:
-1. Provide a detailed and comprehensive answer based strictly on the policy document context
-2. Include specific numbers, percentages, time periods, and conditions exactly as mentioned
-3. For waiting periods, grace periods, and coverage limits, provide exact values with units
-4. When mentioning benefits or coverage, include any relevant conditions, exclusions, or sub-limits
-5. If the context doesn't contain sufficient information, state "Information not available in the provided document"
-6. Use professional insurance terminology as found in the source document
+ANSWER REQUIREMENTS:
+1. Provide exact numbers: percentages, time periods, monetary limits, age requirements, bed specifications
+2. Include specific conditions, eligibility criteria, and all exclusions or limitations
+3. Mention relevant acts, regulations, or compliance requirements when applicable
+4. Specify caps, sub-limits, maximum/minimum values with precise units
+5. Include both coverage details AND restrictions/limitations in the same answer
+6. Reference specific policy sections, definitions, or technical terms
+7. Quote exact policy language for important terms and conditions
+8. Include procedural details like claim processes or documentation requirements
+9. For waiting periods: specify exact duration, triggers, and any exceptions
+10. For benefits: include complete eligibility conditions and renewal requirements
 
-Answer:"""
+FORMAT: Provide a comprehensive, standalone answer with all relevant details, conditions, limitations, and specific numerical values exactly as stated in the policy.
+
+CRITICAL: Base your answer strictly on the policy document context provided. If information is not available, state "Information not available in the provided document" but try to provide any related information that IS available.
+
+ANSWER:"""
 
             # Generate answer using Gemini
             response = self.gemini_client.models.generate_content(
@@ -313,7 +321,7 @@ Answer:"""
             # Create batch prompt with all questions
             questions_text = "\n".join([f"{i+1}. {q}" for i, q in enumerate(questions)])
             
-            prompt = f"""You are an expert insurance policy analyst. Your task is to answer ALL questions based STRICTLY on the provided policy context.
+            prompt = f"""You are an expert insurance policy analyst specializing in the National Parivar Mediclaim Plus Policy. Answer each question with precise, detailed information based strictly on the provided policy context.
 
 POLICY CONTEXT:
 {context}
@@ -321,15 +329,28 @@ POLICY CONTEXT:
 QUESTIONS TO ANSWER:
 {questions_text}
 
-CRITICAL INSTRUCTIONS:
-1. Read the entire context carefully before answering any question
-2. For each question, search through ALL the context for relevant information
-3. Provide specific, detailed answers with exact numbers, time periods, and conditions
-4. Quote relevant policy terms and conditions when applicable
-5. If the exact information is not explicitly stated in the context, try to infer from related information
-6. ONLY use "Information not available in the provided document" as a last resort when absolutely no related information exists
-7. Format your response as a numbered list (1., 2., 3., etc.) matching the question numbers
-8. Each answer should be complete and self-contained
+ANSWER REQUIREMENTS:
+1. Provide exact numbers: percentages, time periods, monetary limits, bed requirements, age limits
+2. Include specific conditions, eligibility criteria, and exclusions for each benefit
+3. Mention relevant acts, regulations, or compliance requirements (e.g., Transplantation of Human Organs Act)
+4. Specify caps, sub-limits, and maximum/minimum values with units
+5. Include both coverage details AND limitations/restrictions in the same answer
+6. Reference specific policy sections, definitions, or technical terms when relevant
+7. Use complete, professional sentences that stand alone and are self-explanatory
+8. For waiting periods: specify exact duration, what triggers coverage, and any exceptions
+9. For benefits: include eligibility conditions, claim limits, and renewal requirements
+10. For definitions: provide complete institutional requirements and technical specifications
+11. Quote exact policy language when providing specific terms and conditions
+12. Include procedural details like claim processes, documentation requirements, or approval steps
+
+FORMAT INSTRUCTIONS:
+- Answer each question comprehensively with all relevant details, conditions, and limitations
+- Start each answer with the main point, then provide supporting details and conditions
+- Include specific numerical values exactly as stated in the policy
+- Mention both what IS covered and what is NOT covered or excluded
+- Use numbered format (1., 2., 3., etc.) matching the question numbers
+
+CRITICAL: Base answers ONLY on the provided context. Include specific numerical values, exact time periods, precise conditions, and complete eligibility requirements exactly as stated in the policy document.
 
 ANSWER ALL {len(questions)} QUESTIONS:"""
 
@@ -441,14 +462,28 @@ ANSWER ALL {len(questions)} QUESTIONS:"""
                             if question_context:
                                 context_text = "\n\n".join(question_context[:8])
                                 
-                                individual_prompt = f"""Based on the following insurance policy context, answer this specific question with detailed information:
+                                individual_prompt = f"""You are an expert insurance policy analyst specializing in the National Parivar Mediclaim Plus Policy. Answer this specific question with comprehensive, detailed information based strictly on the provided policy context.
 
-CONTEXT:
+POLICY CONTEXT:
 {context_text}
 
 QUESTION: {retry_question}
 
-Provide a detailed answer with specific policy terms, numbers, and conditions. If the information is truly not available, explain what related information is available instead.
+ANSWER REQUIREMENTS:
+1. Provide exact numbers: percentages, time periods, monetary limits, age requirements, bed counts
+2. Include specific conditions, eligibility criteria, and all exclusions
+3. Mention relevant acts, regulations, or compliance requirements
+4. Specify caps, sub-limits, maximum/minimum values with precise units
+5. Include both what IS covered and what is NOT covered or excluded
+6. Reference specific policy sections, definitions, or technical terms
+7. Quote exact policy language for terms and conditions
+8. Include procedural details, documentation requirements, or approval processes
+9. For waiting periods: specify exact duration and any exceptions or waivers
+10. For benefits: include complete eligibility conditions and renewal requirements
+
+FORMAT: Provide a comprehensive, standalone answer that includes all relevant details, conditions, limitations, and specific numerical values exactly as stated in the policy.
+
+CRITICAL: Base your answer ONLY on the provided context. If information is truly not available, explain what related information IS available in the policy.
 
 ANSWER:"""
                                 
