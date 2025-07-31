@@ -7,7 +7,7 @@ if sys.platform.startswith('win'):
     import io
     sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8')
 
-file_path = os.environ.get('FILE_PATH', '../dataset/pdf-format/1.pdf')
+file_path = os.environ.get('FILE_PATH', '../dataset/pdf-format/2.pdf')
 
 loader = PyPDFLoader(file_path)
 pages = []

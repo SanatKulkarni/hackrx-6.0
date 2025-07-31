@@ -13,10 +13,9 @@ from langchain.schema.retriever import BaseRetriever
 from langchain_community.vectorstores import Chroma
 from typing import List
 
-# Load environment variables from .env file
+
 load_dotenv()
 
-# Define prompt template for insurance adjudicator
 prompt_template = """
 You are an experienced insurance adjudicator with extensive knowledge of insurance policies and claim assessment. Your role is to evaluate insurance claims based on policy terms and claimant circumstances.
 
@@ -78,7 +77,6 @@ You must format your response as a single, valid JSON object with exactly this s
 Remember: Your entire response must be only the JSON object above. No additional text, explanations, or markdown formatting.
 """
 
-# Configure Google API key from environment
 def configure_google_api():
     """Configure Google Generative AI API key"""
     api_key = os.getenv("GEMINI_API_KEY")
@@ -87,19 +85,17 @@ def configure_google_api():
         api_key = getpass.getpass("Enter your Google Generative AI API key: ")
         os.environ["GEMINI_API_KEY"] = api_key
     
-    # Initialize Google Generative AI client
     client = genai.Client(api_key=api_key)
     return client
 
-# Initialize Nomic embeddings (same as in embeddings/__init__.py)
+
 def initialize_nomic_embeddings():
     """Initialize Nomic embeddings with same configuration as embeddings folder"""
-    # Check for Nomic API key
     if not os.getenv("NOMIC_API_KEY"):
         print("Nomic API key not found. Please get one from https://atlas.nomic.ai/")
         os.environ["NOMIC_API_KEY"] = getpass.getpass("Enter your Nomic API key: ")
     
-    # Initialize Nomic embeddings with same parameters as embeddings/__init__.py
+
     embeddings = NomicEmbeddings(
         model="nomic-embed-text-v1.5",
         dimensionality=768,  
@@ -108,7 +104,7 @@ def initialize_nomic_embeddings():
     
     return embeddings
 
-# Load existing Chroma vector database
+
 def load_chroma_db(embeddings, db_path="../database/"):
     """
     Load existing Chroma vector database from persistent directory
@@ -121,18 +117,18 @@ def load_chroma_db(embeddings, db_path="../database/"):
         chromadb.Collection: Chroma collection object
     """
     try:
-        # Create the database directory if it doesn't exist
+
         os.makedirs(db_path, exist_ok=True)
         
-        # Initialize Chroma client with persistent storage
+
         chroma_client = chromadb.PersistentClient(path=db_path)
         
-        # Try to get existing collection, create if it doesn't exist
+
         try:
             collection = chroma_client.get_collection(name="policy_documents")
             print(f"Loaded existing collection 'policy_documents' from {db_path}")
         except:
-            # If collection doesn't exist, create it
+
             collection = chroma_client.create_collection(name="policy_documents")
             print(f"Created new collection 'policy_documents' in {db_path}")
         
@@ -155,7 +151,7 @@ def create_retriever(collection, embeddings, k=5):
         retriever: Configured retriever object
     """
     try:
-        # Check if collection has any documents
+
         collection_count = collection.count()
         print(f"Collection contains {collection_count} documents")
         
@@ -163,14 +159,14 @@ def create_retriever(collection, embeddings, k=5):
             print("⚠️  Warning: Collection is empty. Please add documents to the database first.")
             print("You can add documents using the embedding and loading scripts in your project.")
         
-        # Use LangChain's Chroma vectorstore
+
         vectorstore = Chroma(
             collection_name="policy_documents",
             embedding_function=embeddings,
             persist_directory="../database/"
         )
         
-        # Create retriever from vectorstore
+
         retriever = vectorstore.as_retriever(
             search_type="similarity",
             search_kwargs={"k": k}
@@ -183,7 +179,7 @@ def create_retriever(collection, embeddings, k=5):
         print(f"Error creating retriever: {e}")
         print("Attempting fallback method...")
         
-        # Fallback: Create a simple custom retriever
+
         try:
             class SimpleChromaRetriever(BaseRetriever):
                 def __init__(self, collection, embeddings, k=5):
@@ -195,16 +191,16 @@ def create_retriever(collection, embeddings, k=5):
                 def _get_relevant_documents(self, query: str) -> List[Document]:
                     """Retrieve relevant documents for a given query"""
                     try:
-                        # Generate embedding for the query
+
                         query_embedding = self.embeddings.embed_query(query)
                         
-                        # Search the collection
+
                         results = self.collection.query(
                             query_embeddings=[query_embedding],
                             n_results=self.k
                         )
                         
-                        # Convert results to Document objects
+
                         documents = []
                         if results.get('documents') and results['documents'][0]:
                             for i, doc in enumerate(results['documents'][0]):
@@ -220,7 +216,7 @@ def create_retriever(collection, embeddings, k=5):
                         print(f"Error in retrieval: {e}")
                         return []
             
-            # Create fallback retriever
+
             fallback_retriever = SimpleChromaRetriever(collection, embeddings, k)
             print(f"✅ Fallback retriever created successfully (k={k})")
             return fallback_retriever
@@ -241,7 +237,7 @@ def setup_retrieval_qa_chain(retriever, api_key):
         RetrievalQA: Configured RetrievalQA chain
     """
     try:
-        # Initialize ChatGoogleGenerativeAI model
+
         llm = ChatGoogleGenerativeAI(
             model="gemini-2.5-flash",
             temperature=0,
@@ -250,14 +246,14 @@ def setup_retrieval_qa_chain(retriever, api_key):
         )
         print("✅ ChatGoogleGenerativeAI model initialized")
         
-        # Create PromptTemplate object from the prompt_template string
+
         prompt = PromptTemplate(
             template=prompt_template,
             input_variables=["context", "question"]
         )
         print("✅ PromptTemplate created from prompt_template")
         
-        # Create RetrievalQA chain
+
         qa_chain = RetrievalQA.from_chain_type(
             llm=llm,
             chain_type="stuff",
@@ -285,10 +281,10 @@ def query_insurance_claim(qa_chain, question):
         dict: Response containing result and source documents
     """
     try:
-        # Query the chain
+
         response = qa_chain.invoke({"query": question})
         
-        # Extract result and source documents
+
         result = {
             "answer": response.get("result", ""),
             "source_documents": response.get("source_documents", [])
@@ -304,17 +300,17 @@ def main():
     """Main function to initialize all components"""
     print("=== Chat System Initialization ===")
     
-    # Step 1: Configure Google Generative AI
+
     print("1. Configuring Google Generative AI...")
     genai_client = configure_google_api()
     print("✅ Google Generative AI configured successfully")
     
-    # Step 2: Initialize Nomic embeddings
+
     print("2. Initializing Nomic embeddings...")
     embeddings = initialize_nomic_embeddings()
     print("✅ Nomic embeddings initialized successfully")
     
-    # Step 3: Load Chroma vector database
+
     print("3. Loading Chroma vector database...")
     collection = load_chroma_db(embeddings)
     if collection:
@@ -323,12 +319,12 @@ def main():
         print("❌ Failed to load Chroma vector database")
         return
     
-    # Step 4: Create retriever from vector store
+
     print("4. Creating retriever from vector store...")
     retriever = create_retriever(collection, embeddings, k=5)
     if retriever:
         print("✅ Retriever created successfully")
-        # Test the retriever
+
         try:
             test_docs = retriever.get_relevant_documents("test query")
             print(f"✅ Retriever test successful - found {len(test_docs)} documents")
@@ -338,7 +334,7 @@ def main():
         print("❌ Failed to create retriever")
         return
     
-    # Step 5: Set up RetrievalQA chain
+
     print("5. Setting up RetrievalQA chain...")
     api_key = os.getenv("GEMINI_API_KEY")
     qa_chain = setup_retrieval_qa_chain(retriever, api_key)
@@ -348,9 +344,9 @@ def main():
         print("❌ Failed to set up RetrievalQA chain")
         return
     
-    # Step 6: Placeholder for user query and demonstration
+
     print("\n=== Ready for Chat ===")
-    user_query = "What are the coverage details for knee surgery in Pune?"  # Placeholder query
+    user_query = "What are the coverage details for knee surgery in Pune?" 
     
     print(f"Placeholder user query: {user_query}")
     print("\n--- System Components Ready ---")
@@ -360,13 +356,13 @@ def main():
     print("✅ Retriever:", type(retriever).__name__)
     print("✅ RetrievalQA Chain:", type(qa_chain).__name__)
     
-    # Demonstrate retriever functionality
+
     print("\n=== Testing Retriever ===")
     try:
         relevant_docs = retriever.get_relevant_documents(user_query)
         print(f"Retrieved {len(relevant_docs)} relevant documents:")
         
-        for i, doc in enumerate(relevant_docs[:3]):  # Show first 3 documents
+        for i, doc in enumerate(relevant_docs[:3]):  
             print(f"\nDocument {i+1}:")
             print(f"Content: {doc.page_content[:200]}...")
             print(f"Metadata: {doc.metadata}")
@@ -375,10 +371,9 @@ def main():
         print(f"Error testing retriever: {e}")
         print("Note: This is expected if the database is empty. Add some documents first.")
     
-    # Demonstrate RetrievalQA chain functionality
     print("\n=== Testing RetrievalQA Chain ===")
     try:
-        # Test the complete RAG pipeline
+
         claim_question = "46-year-old male needs knee surgery in Pune with 3-month-old insurance policy"
         print(f"Testing claim question: {claim_question}")
         
@@ -388,7 +383,7 @@ def main():
         print(f"Answer: {response['answer'][:500]}...")
         print(f"Source Documents Used: {len(response['source_documents'])}")
         
-        # Show source documents
+
         for i, doc in enumerate(response['source_documents'][:2]):
             print(f"\nSource Document {i+1}:")
             print(f"Content: {doc.page_content[:150]}...")
@@ -407,16 +402,16 @@ def main():
 if __name__ == "__main__":
     main()
     
-    # Final demonstration: Process a specific insurance claim
+
     print("\n" + "="*60)
     print("🏥 INSURANCE CLAIM PROCESSING DEMONSTRATION")
     print("="*60)
     
     try:
-        # Step 1: Initialize all components
+
         print("\n1. Initializing system components...")
         
-        # Configure API keys
+
         genai_client = configure_google_api()
         embeddings = initialize_nomic_embeddings()
         collection = load_chroma_db(embeddings)
@@ -430,15 +425,15 @@ if __name__ == "__main__":
         
         print("✅ All components initialized successfully")
         
-        # Step 2: Define user query
+
         query = "46M, knee surgery, Pune, 3-month policy"
         print(f"\n2. Processing insurance claim query: '{query}'")
         
-        # Step 3: Invoke RetrievalQA chain
+
         print("\n3. Invoking RetrievalQA chain...")
         result_dict = qa_chain.invoke({"query": query})
         
-        # Step 4: Extract result from dictionary
+
         print("\n4. Extracting result from chain response...")
         if "result" not in result_dict:
             print("❌ No 'result' key found in chain response")
@@ -448,20 +443,16 @@ if __name__ == "__main__":
         gemini_response = result_dict["result"]
         print(f"✅ Raw Gemini response extracted (length: {len(gemini_response)} characters)")
         
-        # Step 5: Parse JSON response
         print("\n5. Parsing JSON response...")
         try:
-            # Clean the response (remove any potential markdown formatting)
             cleaned_response = gemini_response.strip()
             if cleaned_response.startswith("```json"):
                 cleaned_response = cleaned_response.replace("```json", "").replace("```", "").strip()
             elif cleaned_response.startswith("```"):
                 cleaned_response = cleaned_response.replace("```", "").strip()
             
-            # Parse JSON
             parsed_result = json.loads(cleaned_response)
             
-            # Success! Pretty-print the result
             print("✅ JSON parsing successful!")
             print("\n" + "="*50)
             print("📋 INSURANCE CLAIM DECISION")
@@ -469,7 +460,6 @@ if __name__ == "__main__":
             print(json.dumps(parsed_result, indent=2, ensure_ascii=False))
             print("="*50)
             
-            # Display source documents if available
             if "source_documents" in result_dict and result_dict["source_documents"]:
                 print(f"\n📚 Source Documents Used: {len(result_dict['source_documents'])}")
                 for i, doc in enumerate(result_dict["source_documents"][:3]):

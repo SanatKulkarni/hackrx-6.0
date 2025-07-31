@@ -2,7 +2,7 @@ import os
 import sys
 import subprocess
 
-# Add the parent directory to the path to import from embeddings module
+
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from embeddings import embed_chunks
@@ -19,16 +19,14 @@ def embedding_query(query: str):
         dict: Query results from ChromaDB
     """
     try:
-        # Step 1: Create embeddings using the embeddings/__init__.py module
+
         print(f"Creating embedding for query: {query}")
-        query_embeddings = embed_chunks([query])  # Pass as list, get list back
+        query_embeddings = embed_chunks([query])  
         
-        # Step 2: Search the database using store_to_db.py
         print("Searching database for similar content...")
         db_path = "../database"
         collection_name = "policy_documents"
         
-        # Query the collection
         results = query_collection(
             query_text=query,
             collection_name=collection_name,
@@ -41,7 +39,6 @@ def embedding_query(query: str):
         
     except Exception as e:
         print(f"Error in embedding_query: {e}")
-        # Fallback to subprocess if direct import fails
         return embedding_query_subprocess(query)
 
 def embedding_query_subprocess(query: str):
@@ -55,7 +52,6 @@ def embedding_query_subprocess(query: str):
         dict: Results from subprocess execution
     """
     try:
-        # Create a temporary Python script to run the embedding process
         script_content = f'''
 import sys
 import os
@@ -83,12 +79,10 @@ except Exception as e:
     print(f"Error: {{e}}")
 '''
         
-        # Write temporary script
         temp_script = "temp_embedding_query.py"
         with open(temp_script, 'w') as f:
             f.write(script_content)
         
-        # Execute subprocess
         result = subprocess.run(
             [sys.executable, temp_script],
             capture_output=True,
@@ -96,13 +90,12 @@ except Exception as e:
             cwd=os.path.dirname(os.path.abspath(__file__))
         )
         
-        # Clean up temporary script
         if os.path.exists(temp_script):
             os.remove(temp_script)
         
         if result.returncode == 0:
             try:
-                return eval(result.stdout.strip())  # Convert string back to dict
+                return eval(result.stdout.strip())  
             except:
                 print(f"Subprocess output: {result.stdout}")
                 return {"documents": [[]], "distances": [[]], "ids": [[]]}
@@ -128,10 +121,8 @@ def store_query_embeddings(text_chunks: list, collection_name: str = "policy_doc
     try:
         print(f"Creating embeddings for {len(text_chunks)} chunks...")
         
-        # Step 1: Create embeddings using embeddings/__init__.py
         embeddings = embed_chunks(text_chunks)
         
-        # Step 2: Store to database using store_to_db.py
         print("Storing embeddings to database...")
         collection = store_embeddings_to_db(
             chunks=text_chunks,
@@ -159,7 +150,6 @@ def store_embeddings_subprocess(text_chunks: list, collection_name: str):
         bool: True if successful, False otherwise
     """
     try:
-        # Create temporary script for storing embeddings
         script_content = f'''
 import sys
 import os
@@ -187,7 +177,6 @@ except Exception as e:
     print(f"ERROR: {{e}}")
 '''
         
-        # Write and execute temporary script
         temp_script = "temp_store_embeddings.py"
         with open(temp_script, 'w') as f:
             f.write(script_content)
@@ -199,7 +188,7 @@ except Exception as e:
             cwd=os.path.dirname(os.path.abspath(__file__))
         )
         
-        # Clean up
+        
         if os.path.exists(temp_script):
             os.remove(temp_script)
         
@@ -221,13 +210,11 @@ def main():
     choice = input("Choose option (1 or 2, press Enter for option 1): ").strip()
     
     if choice == "2":
-        # Store new content
         print("\n--- Store New Content ---")
         content = input("Enter text content to store (or press Enter for sample): ").strip()
         if not content:
             content = "Sample insurance policy for knee surgery coverage in Pune for 46-year-old male patients"
         
-        # Split content into chunks (simple split by sentences for demo)
         chunks = [chunk.strip() for chunk in content.split('.') if chunk.strip()]
         
         success = store_query_embeddings(chunks, "policy_documents")
@@ -237,7 +224,7 @@ def main():
             print("❌ Failed to store content to database")
     
     else:
-        # Query database
+        
         print("\n--- Query Database ---")
         default_query = "46M, knee surgery, Pune, 3-month policy"
         user_query = input("Enter your query (press Enter to use default): ").strip()

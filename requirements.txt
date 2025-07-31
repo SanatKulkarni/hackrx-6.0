@@ -6,15 +6,21 @@ langchain-text-splitters
 # Document Loading
 pypdf
 python-docx
+requests
 
 # Embeddings
 langchain-nomic
 
 # Vector Database
-chromadb
+pinecone
 
 # Environment Management
 python-dotenv
+
+# FastAPI and ASGI server
+fastapi
+uvicorn[standard]
+pydantic
 
 # Development and Testing
 pytest
