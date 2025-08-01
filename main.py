@@ -16,8 +16,8 @@ from dotenv import load_dotenv
 # Load environment variables
 load_dotenv()
 
-# Import our Q&A system
-from hackathon_qa_system import HackathonQASystem
+# Import our Q&A system from final_codebase package
+from final_codebase import HackathonQASystem
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)

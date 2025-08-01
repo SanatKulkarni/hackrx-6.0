@@ -14,9 +14,9 @@ langchain-nomic
 # Vector Database
 pinecone
 
-# LLM - Google Generative AI
-google-generativeai
+# LLM - Google Gemini AI
 google-genai
+google-generativeai
 
 # Environment Management
 python-dotenv
