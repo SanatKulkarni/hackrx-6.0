@@ -279,3 +279,5 @@ debug_output/
 poetry.lock
 Pipfile.lock
 requirements-dev.txt
+
+env.yaml
