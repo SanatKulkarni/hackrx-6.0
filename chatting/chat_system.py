@@ -91,10 +91,10 @@ def configure_google_api():
 
 def initialize_nomic_embeddings():
     """Initialize Nomic embeddings with same configuration as embeddings folder"""
-    if not os.getenv("NOMIC_API_KEY"):
-        print("Nomic API key not found. Please get one from https://atlas.nomic.ai/")
-        os.environ["NOMIC_API_KEY"] = getpass.getpass("Enter your Nomic API key: ")
-    
+    nomic_key = os.getenv("NOMIC_API_KEY")
+    if not nomic_key:
+        raise EnvironmentError("❌ NOMIC_API_KEY not set. Please add it to your .env or environment.")
+
 
     embeddings = NomicEmbeddings(
         model="nomic-embed-text-v1.5",
