@@ -27,6 +27,12 @@ uvicorn[standard]
 gunicorn
 pydantic
 
+# Advanced NLP and Semantic Search
+sentence-transformers
+scikit-learn
+numpy
+torch
+
 # Development and Testing
 pytest
 pytest-asyncio
