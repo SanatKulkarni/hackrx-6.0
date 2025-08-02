@@ -4,14 +4,14 @@ Handles Gemini AI model integration for answer generation
 """
 
 import os
-from google import genai
+import google.generativeai as genai
 from .config import Config
 
 class GeminiAIClient:
     """Gemini AI client for answer generation"""
     
     def __init__(self):
-        self.client = None
+        self.model = None
         self.model_name = Config.GEMINI_MODEL
         self.setup_client()
     
@@ -21,7 +21,11 @@ class GeminiAIClient:
             if not Config.GEMINI_API_KEY:
                 raise ValueError("GEMINI_API_KEY not found in environment variables")
             
-            self.client = genai.Client(api_key=Config.GEMINI_API_KEY)
+            # Configure the API key
+            genai.configure(api_key=Config.GEMINI_API_KEY)
+            
+            # Initialize the model
+            self.model = genai.GenerativeModel(self.model_name)
             
             print("✅ Gemini AI client initialized")
             
@@ -53,23 +57,24 @@ CONTEXT FROM POLICY DOCUMENTS:
 QUESTIONS TO ANSWER:
 {questions_text}
 
-IMPORTANT INSTRUCTIONS:
+CRITICAL INSTRUCTIONS:
 - Answer each question in exactly ONE paragraph only
 - Use strictly plain text format with NO formatting, NO markdown, NO bullet points
-- Include specific numbers, percentages, time periods, and exact references from the policy
-- Keep answers precise but complete with all relevant details
-- If information is not in the context, say "Information not available in the provided policy documents"
+- ALWAYS include both written numbers AND numerical values (e.g., "thirty-six (36) months", "twenty-four (24) months", "two (2) years")
+- ALWAYS convert percentages to both written and numerical form (e.g., "twenty percent (20%)")
+- Include ALL specific amounts, percentages, time periods, and exact references from the policy
+- Search thoroughly through the entire context - information may be scattered across different sections
+- If partial information is found, provide what is available and specify what is missing
+- Only say "Information not available" if absolutely no relevant information exists in the context
 - Format as: "1. [Single paragraph answer]", "2. [Single paragraph answer]", etc.
-- Always include specific amounts, percentages, waiting periods, and conditions exactly as mentioned in the policy
+- Be comprehensive - include ALL relevant details, conditions, exceptions, and sub-clauses
+- Always prioritize numerical accuracy and completeness
 
-Provide concise, numbered single-paragraph answers in plain text only with specific numbers and references:"""
+Provide numbered single-paragraph answers with ALL numerical values in both written and numeric format:"""
 
             print("🎯 Generating comprehensive answers with Gemini AI...")
             
-            response = self.client.models.generate_content(
-                model=self.model_name,
-                contents=qa_prompt
-            )
+            response = self.model.generate_content(qa_prompt)
             
             print("✅ Gemini AI response received, parsing answers...")
             

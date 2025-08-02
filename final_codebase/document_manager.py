@@ -76,9 +76,17 @@ class DocumentManager:
             
             # Check if document already exists
             if self.check_document_exists(document_url, index_name, namespace):
-                print(f"✅ Document already exists in vector database - skipping processing")
+                print(f"✅ Document already exists in vector database - loading existing chunks")
                 print(f"🚀 Using cached document embeddings for faster response")
-                return True
+                
+                # Load existing chunks from Pinecone for in-memory operations
+                success = self._load_existing_chunks_from_pinecone(document_url, index_name, namespace)
+                if success:
+                    print(f"📚 Loaded {len(self.document_chunks)} chunks from vector database")
+                    return True
+                else:
+                    print("⚠️  Failed to load existing chunks - will reprocess document")
+                    # Fall through to reprocess the document
             
             print(f"📥 New document detected - processing and storing...")
             
@@ -182,3 +190,54 @@ class DocumentManager:
     def get_document_chunks(self) -> List[Dict[str, Any]]:
         """Get document chunks"""
         return self.document_chunks
+    
+    def _load_existing_chunks_from_pinecone(self, document_url: str, index_name: str, namespace: str) -> bool:
+        """
+        Load existing document chunks from Pinecone vector database
+        
+        Args:
+            document_url (str): URL of the document
+            index_name (str): Pinecone index name  
+            namespace (str): Pinecone namespace
+            
+        Returns:
+            bool: Success status
+        """
+        try:
+            # Generate document ID
+            document_id = self._generate_document_id(document_url)
+            
+            # Query Pinecone for all chunks of this document using text query approach
+            query_result = self.query_embeddings(
+                query_text="policy insurance coverage",  # Generic query
+                index_name=index_name,
+                namespace=namespace, 
+                n_results=Config.MAX_CHUNKS_TO_RETRIEVE,
+                filter={"document_id": document_id}
+            )
+            
+            if not query_result or 'matches' not in query_result:
+                return False
+            
+            # Convert Pinecone results back to chunk format
+            self.document_chunks = []
+            for match in query_result['matches']:
+                if 'metadata' in match and 'text' in match['metadata']:
+                    chunk = {
+                        'text': match['metadata']['text'],
+                        'text_lower': match['metadata']['text'].lower(),
+                        'chunk_id': match['id'],
+                        'document_id': document_id
+                    }
+                    self.document_chunks.append(chunk)
+            
+            print(f"📥 Successfully loaded {len(self.document_chunks)} chunks from Pinecone")
+            return True
+            
+        except Exception as e:
+            print(f"❌ Error loading existing chunks: {e}")
+            return False
+    
+    def _generate_document_id(self, document_url: str) -> str:
+        """Generate a unique document ID from URL"""
+        return hashlib.md5(document_url.encode()).hexdigest()

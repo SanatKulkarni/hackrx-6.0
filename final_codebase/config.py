@@ -33,7 +33,8 @@ class Config:
     PINECONE_INDEX_NAME = os.getenv("PINECONE_INDEX_NAME", "hackathon-policies")
     
     # Gemini AI Configuration
-    GEMINI_MODEL = "gemini-2.5-flash"
+    # AI Model Configuration
+    GEMINI_MODEL = "gemini-2.5-flash"  # Latest Gemini 2.5 Flash model
     
     # Document Processing Configuration
     CHUNK_SIZE = 1500
