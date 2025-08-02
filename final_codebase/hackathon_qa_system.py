@@ -74,12 +74,12 @@ class HackathonQASystem:
         )
         
         if success and chunk_texts and self.semantic_engine.model:
-            print("🔮 Computing semantic embeddings for chunks...")
+            print("🔮 Computing Nomic semantic embeddings for chunks...")
             self.chunk_embeddings = self.semantic_engine.encode_texts(
                 chunk_texts, show_progress=True
             )
             if self.chunk_embeddings is not None:
-                print(f"✅ Computed embeddings for {len(chunk_texts)} chunks")
+                print(f"✅ Computed Nomic embeddings for {len(chunk_texts)} chunks")
         
         return success
     

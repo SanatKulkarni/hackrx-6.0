@@ -34,14 +34,14 @@ class Config:
     
     # Gemini AI Configuration
     # AI Model Configuration
-    GEMINI_MODEL = "gemini-2.5-flash"  # Latest Gemini 2.5 Flash model
+    GEMINI_MODEL = "gemini-2.5-pro"  # Latest Gemini 2.5 Flash model
     
     # Document Processing Configuration
     CHUNK_SIZE = 1500
     CHUNK_OVERLAP = 300
     
-    # Semantic Search Configuration
-    SEMANTIC_MODEL = 'all-MiniLM-L6-v2'
+    # Semantic Search Configuration  
+    SEMANTIC_MODEL = 'all-mpnet-base-v2'  # Higher quality model (768 dimensions)
     MAX_CHUNKS_TO_RETRIEVE = 1000
     MAX_TOPIC_QUERIES = 150
     MAX_SEARCH_QUERIES = 50

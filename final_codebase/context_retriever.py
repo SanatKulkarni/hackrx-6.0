@@ -10,8 +10,9 @@ from .query_generator import QueryGenerator
 class ContextRetriever:
     """Handles context retrieval for Q&A system"""
     
-    def __init__(self):
-        self.semantic_engine = SemanticSearchEngine()
+    def __init__(self, chunks: List[str] = None, pinecone_index=None):
+        self.chunks = chunks or []
+        self.semantic_search = SemanticSearchEngine()
         self.query_generator = QueryGenerator()
     
     def get_relevant_context(self, questions: List[str], document_chunks, chunk_embeddings=None) -> str:
@@ -27,8 +28,8 @@ class ContextRetriever:
             str: Relevant context text
         """
         # Try semantic search first
-        if self.semantic_engine.model and chunk_embeddings is not None:
-            context = self.semantic_engine.semantic_search(questions, document_chunks, chunk_embeddings)
+        if self.semantic_search.model and chunk_embeddings is not None:
+            context = self.semantic_search.semantic_search(questions, document_chunks, chunk_embeddings)
             if context:
                 return context
             
