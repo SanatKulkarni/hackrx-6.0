@@ -22,6 +22,24 @@ class QueryGenerator:
         # Add the original questions as primary queries
         topic_queries.extend(questions)
         
+        # Add insurance company identification queries
+        company_queries = [
+            "insurance company name policy issuer",
+            "National Insurance Company policy details",
+            "Star Health Insurance company information",
+            "ICICI Lombard policy provider",
+            "HDFC ERGO insurance company",
+            "Bajaj Allianz policy issuer",
+            "Max Bupa Health Insurance",
+            "New India Assurance company",
+            "Oriental Insurance policy provider",
+            "United India Insurance company",
+            "insurance company policy document header",
+            "policy issued by insurance provider",
+            "mediclaim policy insurance company"
+        ]
+        topic_queries.extend(company_queries)
+        
         # Extract enhanced key terms from each question dynamically
         for question in questions:
             question_lower = question.lower()

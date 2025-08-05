@@ -40,8 +40,8 @@ class Config:
     CHUNK_SIZE = 1500
     CHUNK_OVERLAP = 300
     
-    # Semantic Search Configuration
-    SEMANTIC_MODEL = 'all-MiniLM-L6-v2'
+    # Semantic Search Configuration  
+    SEMANTIC_MODEL = 'all-MiniLM-L6-v2'  # Fast model (384 dimensions) - 5x faster than mpnet
     MAX_CHUNKS_TO_RETRIEVE = 1000
     MAX_TOPIC_QUERIES = 150
     MAX_SEARCH_QUERIES = 50
