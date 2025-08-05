@@ -56,6 +56,14 @@ class ContextRetriever:
             # Extract key terms from questions and topic queries for searching
             search_terms = set()
             
+            # Add insurance company specific terms
+            company_terms = [
+                "national", "insurance", "company", "star", "health", "icici", "lombard",
+                "hdfc", "ergo", "bajaj", "allianz", "max", "bupa", "new", "india", 
+                "assurance", "oriental", "united", "mediclaim", "policy", "issuer", "provider"
+            ]
+            search_terms.update(company_terms)
+            
             # Add terms from original questions
             for question in questions:
                 words = question.lower().replace('?', '').split()

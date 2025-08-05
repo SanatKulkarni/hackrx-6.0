@@ -67,13 +67,21 @@ class ErrorResponse(BaseModel):
     error: str
     detail: str = None
 
-# Initialize Q&A system with same configuration as testing
-qa_system = HackathonQASystem(
-    index_name="hackathon-qa-test",
-    namespace="test-docs"
-)
+# Initialize Q&A system with enhanced configuration for Google Search grounding
+# Global Q&A system instance
+qa_system = None
 
-@app.post("/hackrx/run", response_model=HackRXResponse)
+# Initialize at startup
+try:
+    # Initialize the Q&A system with error handling
+    from final_codebase.hackathon_qa_system import HackathonQASystem
+    qa_system = HackathonQASystem()
+    logger.info("Q&A system initialized successfully with Google Search grounding capabilities")
+    
+except Exception as e:
+    logger.error(f"Failed to initialize Q&A system: {str(e)}")
+    logger.error("Server will start but Q&A functionality will not be available")
+    qa_system = None@app.post("/hackrx/run", response_model=HackRXResponse)
 async def process_hackrx_request(
     request: HackRXRequest,
     token: str = Depends(verify_token)
@@ -85,6 +93,13 @@ async def process_hackrx_request(
     """
     try:
         start_time = time.time()
+        
+        # Check if Q&A system is properly initialized
+        if qa_system is None:
+            raise HTTPException(
+                status_code=503,
+                detail="Q&A system is not properly initialized. Please check server logs."
+            )
         
         logger.info(f"Processing request with {len(request.questions)} questions")
         logger.info(f"Document URL: {request.documents}")
