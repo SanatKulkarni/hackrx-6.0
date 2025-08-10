@@ -81,7 +81,9 @@ try:
 except Exception as e:
     logger.error(f"Failed to initialize Q&A system: {str(e)}")
     logger.error("Server will start but Q&A functionality will not be available")
-    qa_system = None@app.post("/hackrx/run", response_model=HackRXResponse)
+    qa_system = None
+
+@app.post("/hackrx/run", response_model=HackRXResponse)
 async def process_hackrx_request(
     request: HackRXRequest,
     token: str = Depends(verify_token)
@@ -169,11 +171,18 @@ async def root():
     }
 
 if __name__ == "__main__":
+    import os
     import uvicorn
-    port = int(os.getenv("PORT", 8000))
+    
+    # Cloud Run sets PORT environment variable
+    port = int(os.environ.get("PORT", 8000))
+    
+    print(f"🚀 Starting server on port {port}")
+    
+    # Use 0.0.0.0 for Cloud Run (required)
     uvicorn.run(
-        "main:app",
-        host="0.0.0.0",
+        app, 
+        host="0.0.0.0",  # Must be 0.0.0.0 for Cloud Run
         port=port,
-        reload=True
+        log_level="info"
     )

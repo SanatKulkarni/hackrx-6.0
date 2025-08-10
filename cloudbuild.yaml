@@ -1,0 +1,16 @@
+# Cloud Build configuration for source-based deployment
+steps:
+- name: 'gcr.io/cloud-builders/gcloud'
+  args:
+  - 'run'
+  - 'deploy'
+  - 'int21hhackrx6'
+  - '--source'
+  - '.'
+  - '--region'
+  - 'europe-west1'
+  - '--platform'
+  - 'managed'
+  - '--allow-unauthenticated'
+  - '--set-env-vars'
+  - 'GEMINI_API_KEY=AIzaSyAzJno6phNweWn4MMU4j6LUgcqDfTW_cDk,PINECONE_API_KEY=pcsk_4Vh5ok_R3fbBGWrAM59QAVHDA6rAPH8UWChiyY2W5ttHbijE82UWVkHZZ7guSHMbvwLW9p,PINECONE_ENVIRONMENT=us-east-1,PINECONE_INDEX_NAME=hackathon-policies,NOMIC_API_KEY=nk-imXAWTUQV6s5LaZCy_lcXGfC--Y_IVllSlWYKua6tzU'
